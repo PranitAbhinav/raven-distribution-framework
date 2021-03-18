@@ -51,6 +51,41 @@
         }));
     });
 
+        /**
+     * To find indices of values in a particular array
+     * @param x
+     * @param values
+     * @returns {{}}
+     */
+    tf.findIndices = function (x, values) {
+        let indices = [];
+        console.log("values:", values, typeof values, values[0]);
+        for (let i = 0; i < values.length; i++) {
+            let localIndices = [];
+            for (let j = 0; j < x.length; j++) {
+                if (values[i] === x[j]) {
+                    localIndices.push([j]);
+                }
+            }
+            indices.push(localIndices);
+        }
+        console.log("before:", indices);
+        return indices;
+    };
+    tf.sort = function(x){
+              x = tf.tensor(x)
+              console.log(x,typeof x);
+            try {
+                    if (x.shape.length !== 1)
+                        return null;
+                    result = tf.reverse(tf.topk(x, x.shape[0]).values);
+                    return result;
+                } catch (error) {
+                    console.log(error);
+                    return null;
+                }
+    };
+
     function compute(payload) {
         console.log("Computing " + payload.operator);
         switch (payload.operator) {
@@ -787,6 +822,7 @@
                 }
                 break;
 
+
             case "bincount":
                 try {
                     let x = tf.tensor(payload.values[0]);
@@ -838,6 +874,7 @@
                         x.forEachAsync(function (a) {
                             let params1 = params;
                             delete params1.operation;
+
                             let paramsNames = Object.keys(params1);
                             let paramsString = "";
                             for (let i = 0; i < paramsNames.length; i++) {
@@ -846,6 +883,18 @@
                             console.log(paramsString, a, "tf." + operation + "(" + JSON.stringify(a) + paramsString + ").arraySync()");
                             output = eval("tf." + operation + "(" + JSON.stringify(a) + paramsString + ").arraySync()");
                             console.log(output);
+
+                            console.log("Params:", params1);
+                            let paramsNames = Object.keys(params1);
+                            let paramsString = "";
+                            for (let i = 0; i < paramsNames.length; i++) {
+                            console.log("Param111:", params1[paramsNames[i]]);
+                                paramsString = paramsString + "," + JSON.stringify(params1[paramsNames[i]]);
+                            }
+                            console.log("Eval string:", paramsString, a, "tf." + operation + "(" + JSON.stringify(a) + paramsString + ")" );//.arraySync()");
+                            output = eval("tf." + operation + "(" + JSON.stringify(a) + paramsString + ").arraySync()"  );//.arraySync()");
+
+                            console.log("Output:", output);
                             outputs.push(output);
 
                             // TODO: fix the logic
@@ -861,6 +910,7 @@
                     emit_error(payload, error);
                 }
                 break;
+
         }
     }
 
