@@ -51,6 +51,41 @@
         }));
     });
 
+        /**
+     * To find indices of values in a particular array
+     * @param x
+     * @param values
+     * @returns {{}}
+     */
+    tf.findIndices = function (x, values) {
+        let indices = [];
+        console.log("values:", values, typeof values, values[0]);
+        for (let i = 0; i < values.length; i++) {
+            let localIndices = [];
+            for (let j = 0; j < x.length; j++) {
+                if (values[i] === x[j]) {
+                    localIndices.push([j]);
+                }
+            }
+            indices.push(localIndices);
+        }
+        console.log("before:", indices);
+        return indices;
+    };
+    tf.sort = function(x){
+              x = tf.tensor(x)
+              console.log(x,typeof x);
+            try {
+                    if (x.shape.length !== 1)
+                        return null;
+                    result = tf.reverse(tf.topk(x, x.shape[0]).values);
+                    return result;
+                } catch (error) {
+                    console.log(error);
+                    return null;
+                }
+    };
+
     function compute(payload) {
         console.log("Computing " + payload.operator);
         switch (payload.operator) {
@@ -706,6 +741,90 @@
                     emit_error(payload, error);
                 }
                 break;
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+
+            case "bincount":
+                try {
+                    let x = tf.tensor(payload.values[0]);
+                    let params = payload.params;
+                    let weights = params.weights;
+                    let minlength = params.minlength;
+                    if ('weights' in params && 'minlength' in params) {
+                        let result = tf.bincount(x.arraySync(), weights, minlength);
+                        emit_result(payload, result);
+                    } else {
+                        emit_error(payload, "Parameter 'weights' or 'minlength is missing");
+                    }
+                } catch (error) {
+                    emit_error(payload, error);
+                }
+                break;
+            case "where":
+                try {
+                    let a = tf.tensor(payload.values[0]);
+                    let b = tf.tensor(payload.values[0]);
+                    let params = payload.params;
+                    if ('condition' in params) {
+                        let condition = params.condition;
+                        let result = tf.bincount(condition, a.arraySync(), b.arraySync());
+                        emit_result(payload, result);
+                    } else {
+                        emit_error(payload, "Parameter 'condition' is missing");
+                    }
+                } catch (error) {
+                    emit_error(payload, error);
+                }
+                break;
+            case "sign":
+                try {
+                    x = tf.tensor(payload.values[0]);
+                    result = tf.sign(x.arraySync());
+                    emit_result(payload, result);
+                } catch (error) {
+                    emit_error(payload, error);
+                }
+                break;
+            case "foreach":
+                try {
+                    x = tf.data.array(payload.values[0]);
+                    let params = payload.params;
+                    if ('operation' in params) {
+                        let operation = params.operation;
+                        let outputs = [];
+                        x.forEachAsync(function (a) {
+                            let params1 = params;
+                            delete params1.operation;
+                            console.log("Params:", params1);
+                            let paramsNames = Object.keys(params1);
+                            let paramsString = "";
+                            for (let i = 0; i < paramsNames.length; i++) {
+                            console.log("Param111:", params1[paramsNames[i]]);
+                                paramsString = paramsString + "," + JSON.stringify(params1[paramsNames[i]]);
+                            }
+                            console.log("Eval string:", paramsString, a, "tf." + operation + "(" + JSON.stringify(a) + paramsString + ")" );//.arraySync()");
+                            output = eval("tf." + operation + "(" + JSON.stringify(a) + paramsString + ").arraySync()"  );//.arraySync()");
+
+                            console.log("Output:", output);
+                            outputs.push(output);
+
+                            // TODO: fix the logic
+                            if(outputs.length === x.size){
+                                emit_result(payload, outputs);
+                            }
+                        });
+                    } else {
+                        emit_error(payload, "Parameter 'operation' is missing");
+                    }
+
+                } catch (error) {
+                    emit_error(payload, error);
+                }
+                break;
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
         }
     }
 
