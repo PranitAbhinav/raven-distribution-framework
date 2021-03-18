@@ -80,11 +80,6 @@ class KNN_classifier():
             print(y_neighbours)
         pass
 
-    def knearestneighbours(self):
-        pass
-
-    def predict(self):
-        pass
 
 #from sklearn.neighbors import KNeighborsClassifier
 X_train=[[1,2],[12,21],[1,1],[10,10],[2,1],[13,22],[12,20],[11,10],[10,12]]
